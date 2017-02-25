@@ -40,8 +40,12 @@ logger = logging.getLogger(__name__)
 class Autocad(object):
     """Main AutoCAD Automation object
     """
-
-    def __init__(self, create_if_not_exists=False, visible=True):
+    applicationNameList={str(None):'AutoCAD.Application',
+                         str(2017):'AutoCAD.Application.21',
+                         str(2014):'AutoCAD.Application.19',
+                        }
+                         
+    def __init__(self, create_if_not_exists=False, visible=True, cadver=None):
         """
         :param create_if_not_exists: if AutoCAD doesn't run, then
                                      new instanse will be crated
@@ -50,6 +54,9 @@ class Autocad(object):
         self._create_if_not_exists = create_if_not_exists
         self._visible = visible
         self._app = None
+        self._applicationName=self.applicationNameList[str(cadver)]
+        if self._applicationName==None:
+            self._applicationName='AutoCad.Application'
 
     @property
     def app(self):
@@ -60,11 +67,11 @@ class Autocad(object):
         """
         if self._app is None:
             try:
-                self._app = comtypes.client.GetActiveObject('AutoCAD.Application', dynamic=True)
+                self._app = comtypes.client.GetActiveObject(self._applicationName, dynamic=True)
             except WindowsError:
                 if not self._create_if_not_exists:
                     raise
-                self._app = comtypes.client.CreateObject('AutoCAD.Application', dynamic=True)
+                self._app = comtypes.client.CreateObject(self._applicationName, dynamic=True)
                 self._app.Visible = self._visible
         return self._app
 
